@@ -20,6 +20,9 @@ final class DIExtension extends Nette\DI\CompilerExtension
 	public $defaults = [
 		'debugger' => null,
 		'excluded' => [],
+		'export' => [
+			'parameters' => true,
+		],
 		'parentClass' => null,
 	];
 
@@ -41,6 +44,8 @@ final class DIExtension extends Nette\DI\CompilerExtension
 	public function loadConfiguration()
 	{
 		$config = $this->validateConfig($this->defaults);
+		$this->validateConfig($this->defaults['export'], $config['export'], $this->prefix('export'));
+
 		$builder = $this->getContainerBuilder();
 		$builder->addExcludedClasses($config['excluded']);
 	}
@@ -50,6 +55,10 @@ final class DIExtension extends Nette\DI\CompilerExtension
 	{
 		if ($this->config['parentClass']) {
 			$class->setExtends($this->config['parentClass']);
+		}
+
+		if (!$this->config['export']['parameters']) {
+			$class->removeMethod('__construct');
 		}
 
 		$initialize = $class->getMethod('initialize');
